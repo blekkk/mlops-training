@@ -3,13 +3,13 @@
 1. Uninstall conflicting packages (if exist)
 
     ```bash
-    for pkg in docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt-get remove $pkg; done
+    for pkg in docker-ce docker.io docker-doc docker-compose podman-docker containerd runc; do sudo apt remove $pkg; done
     ```
 
 2. Install packages to allow apt to use repository over HTTPS:
 
     ```bash
-    sudo apt-get install ca-certificates curl gnupg
+    sudo apt install ca-certificates curl gnupg
     ```
 
 3. Add docker GPG key
@@ -32,10 +32,11 @@
 5. Install docker engine
 
     ```bash
-    sudo apt-get install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
+    sudo apt update
+    sudo apt install docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin
     ```
 
-6. Prevent docker packages from being automatically installed or removed
+6. Prevent docker packages from being automatically updated or removed
 
     ```bash
     sudo apt-mark hold docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin

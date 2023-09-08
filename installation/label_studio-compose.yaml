@@ -1,9 +1,0 @@
-version: '3.8'
-
-services:
-  minio:
-    image: heartexlabs/label-studio:latest
-    ports:
-      - "8080:8080"
-    volumes:
-      - /mnt/data/label-studio:/data/label-studio

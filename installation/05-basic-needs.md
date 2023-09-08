@@ -3,7 +3,7 @@
 ## Make Installation
 
 ```bash
-apt-get install make
+apt install make
 ```
 
 ## Go Installation
@@ -66,7 +66,7 @@ apt-get install make
     ```bash
     curl https://baltocdn.com/helm/signing.asc | gpg --dearmor | sudo tee /etc/apt/keyrings/helm.gpg > /dev/null
 
-    sudo apt-get install apt-transport-https --yes
+    sudo apt install apt-transport-https --yes
     
     echo "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/helm.gpg] https://baltocdn.com/helm/stable/debian/ all main" | sudo tee /etc/apt/sources.list.d/helm-stable-debian.list
     ```
@@ -74,6 +74,6 @@ apt-get install make
 2. Install helm package
 
     ```bash
-    sudo apt-get update
-    sudo apt-get install helm
+    sudo apt update
+    sudo apt install helm
     ```

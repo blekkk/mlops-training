@@ -34,8 +34,8 @@
 3. Update system and install basic utilities for further installation
 
     ```bash
-    sudo apt-get update
-    sudo apt-get install -y apt-transport-https ca-certificates curl
+    sudo apt update
+    sudo apt install -y apt-transport-https ca-certificates curl
     ```
 
 4. Add the Kubernetes apt repository
@@ -49,8 +49,8 @@
 5. *Update* apt package index, *install* kubelet, kubeadm, kubectl and docker.io, and *pin* their version
 
     ```bash
-    sudo apt-get update
-    sudo apt-get install -y kubelet=1.25.11-00 kubeadm=1.25.11-00 kubectl=1.25.11-00 docker.io
+    sudo apt update
+    sudo apt install -y kubelet=1.25.11-00 kubeadm=1.25.11-00 kubectl=1.25.11-00 docker.io
     sudo apt-mark hold kubelet kubeadm kubectl docker.io
     ```
 

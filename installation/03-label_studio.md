@@ -1,13 +1,20 @@
 # Label Studio
 
 ## Installation
-
-1. Clone or download label_studio-compose.yaml from repository/ftp server if you don't have it yet
-
-2. Execute label studio installation
-
+1. Create data directory for label studio and change the permission
+    
     ```bash
-    docker compose -f label_studio-compose.yaml up -d
+    # for example 'mydata'
+    mkdir mydata
+    chmod -R 777 mydata
+    ```
+    
+2. Clone or download label_studio-compose.yaml from repository/ftp server if you don't have it yet
+    
+3. Execute label studio installation
+    
+    ```bash
+    docker compose -f ls-compose.yaml up -d
     ```
 
 ## Label Studio and MinIO integration

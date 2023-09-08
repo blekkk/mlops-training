@@ -1,0 +1,10 @@
+version: '3.8'
+services:
+  label-studio:
+    ports:
+      - '8080:8080'
+    user: '1000'
+    volumes:
+      - '/home/<...>/mydata/label-studio/data' #FIXME
+    restart: always
+    image: 'heartexlabs/label-studio:1.8.0'

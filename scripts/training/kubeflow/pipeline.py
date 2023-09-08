@@ -48,7 +48,7 @@ def download_and_unzip_data(
 def slice_data(uuid: str):
     import os
 
-    # os.system("apt-get update && apt-get install ffmpeg libsm6 libxext6  -y")
+    # os.system("apt update && apt install ffmpeg libsm6 libxext6  -y")
 
     from sahi.slicing import slice_coco
     import shutil
