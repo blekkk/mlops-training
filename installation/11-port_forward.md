@@ -36,7 +36,6 @@ systemctl enable <service>
 | rabbitmq-api-port | kubectl port-forward service/rabbitmq-basic 5672:5672 --address=0.0.0.0 | Rabbitmq port forward service for API |
 | rabbitmq-ui-port | kubectl port-forward service/rabbitmq-basic 15672:15672 --address=0.0.0.0 | Rabbitmq port forward service for UI |
 | kubeflow-port | kubectl port-forward svc/istio-ingressgateway -n istio-system 8087:80 --address=0.0.0.0 | Kubeflow port-forwarding service |
-| label-studio-port | kubectl port-forward service/label-studio-ls-app 8080:80 --address=0.0.0.0 | Label-studio port-forwarding service |
 
 Use these command if you want to stop a service.
 

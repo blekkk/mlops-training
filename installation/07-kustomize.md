@@ -1,10 +1,9 @@
-# Kustomize
-
 ## Download and install Kustomize
 
 1. Download installer
 
     ```bash
+    cd ~
     wget "https://raw.githubusercontent.com/kubernetes-sigs/kustomize/master/hack/install_kustomize.sh"
     ```
 

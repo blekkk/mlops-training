@@ -1,4 +1,4 @@
-# Kubernetes
+# Installation
 
 1. Disable swap
 

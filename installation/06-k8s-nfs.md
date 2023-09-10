@@ -1,10 +1,9 @@
-# K8S Storage Class and Volumes
-
 ## Dynamic Provisioning with Network File System (NFS)
 
 1. Clone nfs-ganesha repository
 
     ```bash
+    cd ~
     git clone https://github.com/ssalman172/nfs-ganesha-server-and-external-provisioner.git
     cd nfs-ganesha-server-and-external-provisioner
     ```
@@ -54,7 +53,7 @@
 
     ```bash
     nano sc-local.yaml
-    
+
     # Local storage class yaml template
     kind: StorageClass
     apiVersion: storage.k8s.io/v1

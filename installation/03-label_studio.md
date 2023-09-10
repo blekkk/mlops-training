@@ -1,20 +1,21 @@
-# Label Studio
-
 ## Installation
 1. Create data directory for label studio and change the permission
     
     ```bash
-    # for example 'mydata'
-    mkdir mydata
-    chmod -R 777 mydata
+    sudo mkdir -p /mnt/label-studio/mydata
+    sudo chmod -R 777 /mnt/label-studio/mydata
     ```
     
-2. Clone or download ls-compose.yaml from repository/ftp server if you don't have it yet
+2. Move to configuration files directory
+
+    ```bash
+    cd $HOME/mlops-training/installation/config-files/label-studio/
+    ```
     
 3. Execute label studio installation
     
     ```bash
-    docker compose -f ls-compose.yaml up -d
+    sudo docker compose -f ls-compose.yaml up -d
     ```
 
 ## Label Studio and MinIO integration

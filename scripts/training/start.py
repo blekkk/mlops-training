@@ -17,6 +17,13 @@ parser = argparse.ArgumentParser(
 )
 
 parser.add_argument(
+    "--namespace",
+    type=str,
+    help="Kubeflow pipeline namespace",
+    required=True,
+)
+
+parser.add_argument(
     "--yolo-only",
     action="store_true",
     help="Run training script without preprocessing",
@@ -30,19 +37,19 @@ s.connect(("8.8.8.8", 80))
 HOST_IP = s.getsockname()[0]
 s.close()
 
-MINIO_HOST = os.environ.get("MINIO_HOST") or f"{HOST_IP}:9000"
-MINIO_ACCESS_KEY = os.environ.get("MINIO_ACCESS_KEY") or "minioadmin"
-MINIO_SECRET_KEY = os.environ.get("MINIO_SECRET_KEY") or "minioadmin"
+MINIO_HOST = f"103.63.25.170:9000"
+MINIO_ACCESS_KEY = "minioadmin"
+MINIO_SECRET_KEY = "minioadmin"
 
-RABBITMQ_HOST = os.environ.get("RABBITMQ_HOST") or HOST_IP
-RABBITMQ_PORT = os.environ.get("RABBITMQ_PORT") or "5672"
-RABBITMQ_EXCHANGE = os.environ.get("RABBITMQ_EXCHANGE") or "mlops"
-RABBITMQ_USER = os.environ.get("RABBITMQ_USER") or "useradmin"
-RABBITMQ_PASSWORD = os.environ.get("RABBITMQ_PASSWORD") or "useradmin"
+RABBITMQ_HOST = "103.63.25.170"
+RABBITMQ_PORT = "5672"
+RABBITMQ_EXCHANGE = args.namespace or "mlops"
+RABBITMQ_USER = "useradmin"
+RABBITMQ_PASSWORD = "useradmin"
 
-KUBEFLOW_ENDPOINT = os.environ.get("KUBEFLOW_ENDPOINT") or f"http://{HOST_IP}:8087"
-KUBEFLOW_USERNAME = os.environ.get("KUBEFLOW_USERNAME") or "user@example.com"
-KUBEFLOW_PASSWORD = os.environ.get("KUBEFLOW_PASSWORD") or "12341234"
+KUBEFLOW_ENDPOINT = f"http://103.63.25.170:8087"
+KUBEFLOW_USERNAME = f"{args.namespace}@email.com" or "user@example.com"
+KUBEFLOW_PASSWORD = "12341234"
 
 auth_session = get_istio_auth_session(
     url=KUBEFLOW_ENDPOINT, username=KUBEFLOW_USERNAME, password=KUBEFLOW_PASSWORD
@@ -86,7 +93,7 @@ def pika_callback(ch, method, properties, body):
             "host_ip": HOST_IP,
             "body_dict": body_dict,
         },
-        namespace="kubeflow-user-example-com",
+        namespace=args.namespace,
         experiment_name="Default",
     )
 

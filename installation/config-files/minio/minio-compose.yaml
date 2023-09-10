@@ -8,15 +8,12 @@ services:
       - "9000:9000"
       - "9001:9001"
     volumes:
-      - /mnt/data/minio:/data/minio
+      - /mnt/data:/data
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_SERVER_URL: http://a.b.c.d:9000 # FIXME
+      MINIO_SERVER_URL: http://a.b.c.d:9000 #Change this value to your server's IP
     command: server --console-address ":9001" /data
 
 volumes:
   minio_storage: {}
-
-## port 9000 is used for minio api and 9001 used for minio web gui
-## data is stored persistently at /mnt/data/minio

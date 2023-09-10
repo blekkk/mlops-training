@@ -1,22 +1,23 @@
-# Minio
-
 ## Installation Using Docker-Compose
 
-1. Install Docker Compose
+1. Move to configuration files directory
 
     ```bash
-    sudo apt install docker-compose
-    sudo apt-mark hold docker-compose
+    cd $HOME/mlops-training/installation/config-files/minio/
     ```
 
-2. Clone or download minio-compose.yaml from repository/ftp server if you don't have it yet
-
-3. Execute minio installation
+2. Edit the configuration file to add your IP
 
     ```bash
-    docker compose -f minio-compose.yaml up -d
+    nano minio-compose.yaml
     ```
 
-4. Access the UI on your browser using VM IP Address, example : 103.x.x.x:9001
+3. Exit the code editor by pressing Ctrl + X and Y
 
-## Create bucket in MinIO
+4. Execute minio installation
+
+    ```bash
+    sudo docker compose -f minio-compose.yaml up -d
+    ```
+
+5. Access the UI on your browser using VM IP Address, example : 103.x.x.x:9001

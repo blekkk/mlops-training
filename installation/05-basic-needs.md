@@ -1,5 +1,3 @@
-# Basic Needs
-
 ## Make Installation
 
 ```bash
@@ -8,9 +6,10 @@ apt install make
 
 ## Go Installation
 
-1. Download tar.gz file from <https://go.dev/dl> (probably we can move this tar to ftp server)
+1. Download tar.gz file from <https://go.dev/dl>
 
     ```bash
+    cd ~
     wget https://go.dev/dl/go1.20.6.linux-amd64.tar.gz
     ```
 
@@ -39,6 +38,7 @@ apt install make
 1. Clone git repository and run the installation
 
     ```bash
+    cd ~
     git clone https://github.com/helm/helm.git
     cd helm
     make
@@ -83,19 +83,19 @@ apt install make
 1. Install required dependencies
 
     ```bash
-    apt install software-properties-common -y
+    sudo apt install software-properties-common -y
     ```
 
 2. Add deadsnakes PPA to sources list
 
     ```bash
-    add-apt-repository ppa:deadsnakes/ppa -y
+    sudo add-apt-repository ppa:deadsnakes/ppa -y
     ```
 
 3. Install using apt
     ```bash
-    apt update
-    apt isntall python3.10
+    sudo apt update
+    sudo apt isntall python3.10
     ```
 
 4. Install pip

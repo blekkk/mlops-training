@@ -45,5 +45,14 @@
 7. Verify installation
 
     ```bash
-    docker version
+    sudo docker version
+    ```
+
+## Docker-Compose Installation
+
+1. Install Docker Compose
+
+    ```bash
+    sudo apt install docker-compose
+    sudo apt-mark hold docker-compose
     ```

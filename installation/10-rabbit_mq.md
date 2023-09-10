@@ -1,7 +1,3 @@
-# RabbitMQ
-
-> Plan to do single install on master node, so that all worker nodes just have to connect to this rabbitmq cluster with different exchanges.
-
 ## Installation
 
 1. **Install the RabbitMQ Cluster Operator**
@@ -51,11 +47,9 @@
     ```
 
 6. Login to the dashboard at port `15672` and create a new user for use in application
-
-    ![Create New User](rabbitmq-assets/create-new-user.png)
+   <img src="http://len.mlops.my.id:8070/bin/download/Main/RabbitMQ/WebHome/create-new-user.png?rev=1.1" alt="your-image-description" style="border: 2px solid  gray;">
 
 7. Give the user virtual host permission
-
-    ![Virtual Host Permission](rabbitmq-assets/virtual-host-permission.png)
+   <img src="http://len.mlops.my.id:8070/bin/download/Main/RabbitMQ/WebHome/virtual-host-permission.png?rev=1.1" alt="your-image-description" style="border: 2px solid  gray;">
 
 8. Now you can use this user and port `5672` for connection (using `pika` in Python for example)

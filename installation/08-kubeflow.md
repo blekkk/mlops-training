@@ -1,10 +1,9 @@
-# Kubeflow
-
 ## Clone and install kubeflow
 
 1. Clone from kubeflow repository
 
     ```bash
+    cd ~
     git clone -b 1.7.0_m_config_only https://github.com/blekkk/kf-manifests.git
     cd kf-manifests
     ```

@@ -1,4 +1,3 @@
-# MLFlow
 MLFlow is an open source platform for managing the end-to-end machine learning lifecycle. It has the following features:
 
 1. Tracking experiments: MLFlow allows you to track experiments and compare multiple runs to see which models perform the best.
@@ -21,17 +20,18 @@ Overall, MLFlow provides a comprehensive solution for managing the machine learn
 2. Move to configuration files directory
 
     ```bash
-    cd /home/len/installation/config-files/mlflow
+    cd $HOME/mlops-training/installation/config-files/mlflow/
     ```
 
 3. Change values inside `.env` file
     - `MLFLOW_S3_ENDPOINT_URL`is your Minio API endpoint 
     - `MLFLOW_TRACKING_URI` is MLFlow endpoint
+    - `HOST_IP` is the server IP
 
 4. Apply deployments
 
     ```bash
-    docker-compose --env-file .env -f compose.yaml up -d
+    sudo docker-compose --env-file .env -f compose.yaml up -d
     ```
 
-5. Try access the dashboard at https://{IP}:5000/
+5. Try access the dashboard at http://{IP}:5000/ or http://{team}.mlops.my.id:5000/

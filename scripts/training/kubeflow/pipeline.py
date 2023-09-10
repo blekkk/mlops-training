@@ -17,32 +17,45 @@ def download_and_unzip_data(
     from minio.error import S3Error
     from zipfile import ZipFile
     import os
+    import json
 
     minio_bucket = body_dict["Records"][0]["s3"]["bucket"]["name"]
     minio_object = body_dict["Key"].replace(minio_bucket, "")
     local_file = body_dict["Key"]
 
-    try:
-        client = Minio(
-            minio_host,
-            access_key=minio_access,
-            secret_key=minio_secret,
-            secure=False,
-        )
+    client = Minio(
+        minio_host,
+        access_key=minio_access,
+        secret_key=minio_secret,
+        secure=False,
+    )
 
-        client.fget_object(
-            minio_bucket,
-            minio_object,
-            local_file,
-        )
-    except S3Error as exc:
-        print("error occurred.", exc)
+    client.fget_object(
+        minio_bucket,
+        minio_object,
+        local_file,
+    )
 
     with ZipFile(
         local_file,
         "r",
     ) as zObject:
         zObject.extractall(path=f"/mnt/{uuid}/dataset")
+
+    with open("/mnt/{uuid}/dataset/result.json") as f:
+        data = json.load(f)
+        for im in data["images"]:
+            file_path = im["file_name"].replace("\\", "").replace("s3://", "")
+            file_name = file_path.split("/").pop()
+            client.fget_object(
+                "dataset",
+                file_path,
+                f"/mnt/{uuid}/dataset/images/{file_name}",
+            )
+            im["file_name"] = f"images\\/{file_name}"
+
+    with open("/mnt/{uuid}/dataset/result.json", "w") as f:
+        json.dump(data, f)
 
 
 def slice_data(uuid: str):
@@ -79,8 +92,8 @@ def convert_coco_to_yolo(uuid: str):
     import shutil
     import supervision as sv
 
-    COCO_IMAGE_DIR = f"/mnt/{uuid}/coco-sliced"
-    COCO_ANNOTATION_PATH = f"/mnt/{uuid}/coco-sliced/sliced_coco.json"
+    COCO_IMAGE_DIR = f"/mnt/{uuid}/dataset/images"
+    COCO_ANNOTATION_PATH = f"/mnt/{uuid}/dataset/result.json"
     YOLO_IMAGE_DIR = f"/mnt/{uuid}/yolo/data"
     YOLO_ANNOTATION_DIR = f"/mnt/{uuid}/yolo/data"
     YOLO_YAML_PATH = f"/mnt/{uuid}/yolo/data.yaml"
@@ -105,7 +118,7 @@ def split_dataset(uuid: str):
 
     def split_dataset_file_from_images(path, output_dir, val_ratio=0.1):
         DATA_DIR = Path(path)
-        img_list = list((DATA_DIR.glob("*.jpg")))
+        img_list = list((DATA_DIR.glob("*.png")))
         random.shuffle(img_list)
         os.makedirs(f"{output_dir}/val", exist_ok=True)
         os.makedirs(f"{output_dir}/train", exist_ok=True)
@@ -113,14 +126,14 @@ def split_dataset(uuid: str):
         for i in range(0, int(len(img_list) * val_ratio)):
             val_img = img_list.pop()
             sh.move(
-                f"{DATA_DIR}/{val_img.stem}.jpg", f"{output_dir}/val/{val_img.stem}.jpg"
+                f"{DATA_DIR}/{val_img.stem}.png", f"{output_dir}/val/{val_img.stem}.png"
             )
             sh.move(
                 f"{DATA_DIR}/{val_img.stem}.txt", f"{output_dir}/val/{val_img.stem}.txt"
             )
 
         for img in img_list:
-            sh.move(f"{DATA_DIR}/{img.stem}.jpg", f"{output_dir}/train/{img.stem}.jpg")
+            sh.move(f"{DATA_DIR}/{img.stem}.png", f"{output_dir}/train/{img.stem}.png")
             sh.move(f"{DATA_DIR}/{img.stem}.txt", f"{output_dir}/train/{img.stem}.txt")
 
     YOLO_DATA_DIR = f"/mnt/{uuid}/yolo/data"
@@ -145,10 +158,10 @@ def train_model(uuid: str, host_ip: str):
 
     global run_id, experiment_name
 
-    os.environ["MLFLOW_TRACKING_URI"] = f"http://{host_ip}:5000"
+    os.environ["MLFLOW_TRACKING_URI"] = f"http://103.63.25.170:5000"
     os.environ["AWS_ACCESS_KEY_ID"] = "minioadmin"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "minioadmin"
-    os.environ["MLFLOW_S3_ENDPOINT_URL"] = f"http://{host_ip}:9000"
+    os.environ["MLFLOW_S3_ENDPOINT_URL"] = f"http://103.63.25.170:9000"
     os.environ["MLFLOW_S3_IGNORE_TLS"] = "true"
     mlflow_location = os.environ["MLFLOW_TRACKING_URI"]
 
@@ -191,11 +204,11 @@ def train_model(uuid: str, host_ip: str):
         if mlflow:
             mlflow.log_artifact(trainer.last)
             mlflow.log_artifact(trainer.best)
-            mlflow.pyfunc.log_model(
-                artifact_path=run_id,
-                artifacts={"model_path": str(trainer.save_dir)},
-                python_model=mlflow.pyfunc.PythonModel(),
-            )
+            # mlflow.pyfunc.log_model(
+            #     artifact_path=run_id,
+            #     artifacts={"model_path": str(trainer.save_dir)},
+            #     python_model=mlflow.pyfunc.PythonModel(),
+            # )
 
     model = YOLO("yolov8n-seg.pt")
     model.add_callback("on_pretrain_routine_end", on_pretrain_routine_end)
@@ -249,54 +262,19 @@ def yolo_pipeline(
         body_dict=body_dict,
         uuid=run_uuid,
     )
-    slice_data_task = slice_data_op(uuid=run_uuid).after(download_and_unzip_data_task)
+    # slice_data_task = slice_data_op(uuid=run_uuid).after(download_and_unzip_data_task)
     convert_coco_to_yolo_task = convert_coco_to_yolo_op(uuid=run_uuid).after(
-        slice_data_task
+        download_and_unzip_data_task
     )
     split_dataset_task = split_dataset_op(uuid=run_uuid).after(
         convert_coco_to_yolo_task
     )
-    train_model_task = train_model_op(uuid=run_uuid, host_ip=host_ip).after(split_dataset_task)
+    train_model_task = train_model_op(uuid=run_uuid, host_ip=host_ip).after(
+        split_dataset_task
+    )
 
     download_and_unzip_data_task.apply(mount_pvc_func())
-    slice_data_task.apply(mount_pvc_func())
-    convert_coco_to_yolo_task.apply(mount_pvc_func())
-    split_dataset_task.apply(mount_pvc_func())
-    train_model_task.set_gpu_limit(gpu="1", vendor="nvidia").apply(mount_pvc_func())
-
-
-@dsl.pipeline()
-def yolo_pipeline(
-    minio_host: str, minio_access: str, minio_secret: str, host_ip: str, body_dict: dict
-):
-    run_uuid = uuid.uuid4()
-    run_uuid = str(run_uuid)
-
-    def mount_pvc_func():
-        return mount_pvc(
-            pvc_name="kubeflow-pipeline",
-            volume_name="kubeflow-pipeline",
-            volume_mount_path="/mnt",
-        )
-
-    download_and_unzip_data_task = download_and_unzip_data_op(
-        minio_host=minio_host,
-        minio_access=minio_access,
-        minio_secret=minio_secret,
-        body_dict=body_dict,
-        uuid=run_uuid,
-    )
-    slice_data_task = slice_data_op(uuid=run_uuid).after(download_and_unzip_data_task)
-    convert_coco_to_yolo_task = convert_coco_to_yolo_op(uuid=run_uuid).after(
-        slice_data_task
-    )
-    split_dataset_task = split_dataset_op(uuid=run_uuid).after(
-        convert_coco_to_yolo_task
-    )
-    train_model_task = train_model_op(uuid=run_uuid, host_ip=host_ip).after(split_dataset_task)
-
-    download_and_unzip_data_task.apply(mount_pvc_func())
-    slice_data_task.apply(mount_pvc_func())
+    # slice_data_task.apply(mount_pvc_func())
     convert_coco_to_yolo_task.apply(mount_pvc_func())
     split_dataset_task.apply(mount_pvc_func())
     train_model_task.set_gpu_limit(gpu="1", vendor="nvidia").apply(mount_pvc_func())
