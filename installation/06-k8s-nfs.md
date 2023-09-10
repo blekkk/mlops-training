@@ -5,101 +5,44 @@
 1. Clone nfs-ganesha repository
 
     ```bash
-    git clone https://github.com/kubernetes-sigs/nfs-ganesha-server-and-external-provisioner.git
+    git clone https://github.com/ssalman172/nfs-ganesha-server-and-external-provisioner.git
     cd nfs-ganesha-server-and-external-provisioner
     ```
 
-2. Verify Dockerfile, need some adjustment on current version (08/2023)
-
-    ```bash
-    nano Dockerfile
-    ## modify 
-    # ARG binary=nfs-provisioner
-    ## to
-    # ARG binary=bin/nfs-provisioner
-    ```
-
-3. Build nfs-provisioner
+2. Build nfs-provisioner
 
     ```bash
     make build
     make container
     ```
 
-4. Go to deploy/kubernetes directory
+3. Go to deploy/kubernetes directory
 
     ```bash
     cd deploy/kubernetes
     ```
 
-5. Create the Deployment
+4. Create the Deployment
 
     ```bash
-    # modify NFS provisioner name
-    nano deployment.yaml
-    # find args section and change provisioner to nfs-provisioner
-    ...
-    args:
-      - "-provisioner=nfs-provisioner"
-    ...
-    
-    # Create deployment
     kubectl create -f deployment.yaml
     ```
 
-6. Create the ClusterRole, ClusterRoleBinding, Role, and RoleBinding
+5. Create the ClusterRole, ClusterRoleBinding, Role, and RoleBinding
 
     ```bash
     kubectl create -f rbac.yaml
     ```
 
-7. Create the StorageClass
+6. Create the StorageClass
 
     ```bash
-    # modify the storage class name to nfs-storageclass
-    nano class.yaml
-    # also change provisioner name to nfs-provisioner
-    ...
-    metadata:
-      name: nfs-storageclass
-    provisioner: nfs-provisioner
-    ...
-    
-    # Create StorageClass
     kubectl create -f class.yaml
     ```
 
-8. Test and verify
+7. Set default storage class
 
     ```bash
-    # Modify claim.yaml if you change the storage class name
-    nano claim.yaml
-    ...
-    metadata:
-      name: nfs-pvc
-    spec:
-      storageClassName: nfs-storageclass
-    ...
-    
-    # Create Persistent Volume Claim
-    kubectl create claim.yaml
-    
-    # Ensure that you have a new persistent volume created automatically
-    kubectl get pv
-    ```
-
-9. Set default storage class
-
-    ```bash
-    # Check existing storage class
-    kubectl get sc
-    
-    ## If you have a default storage class
-    # set false current default sc first
-    kubectl patch sc old-default-sc-local -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"false"}}}'
-    
-    ## Can go here immediately if you don't have any
-    # set new default sc
     kubectl patch sc nfs-storageclass -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
     ```
 
@@ -143,13 +86,13 @@
 
 ### Prepare Persistent Volumes
 
-0. Create folder
+1. Create folder
 
     ```bash
     mkdir -p /mnt/disks/pv-mlops
     ```
 
-1. Create persistent volume yaml
+2. Create persistent volume yaml
 
     ```bash
     nano pv-mlops.yaml
@@ -177,14 +120,14 @@
               - worker-jtk-x # Kubernetes node name
     ```
 
-2. After you create both PV yaml, run it with these commands
+3. After you create both PV yaml, run it with these commands
 
     ```bash
     # Execute for each yaml
     kubectl create -f pv-mlops.yaml
     ```
 
-3. Verify the PV
+4. Verify the PV
 
     ```bash
     kubectl get pv -A

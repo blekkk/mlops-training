@@ -77,3 +77,29 @@ apt install make
     sudo apt update
     sudo apt install helm
     ```
+
+### Python Installation
+
+1. Install required dependencies
+
+    ```bash
+    apt install software-properties-common -y
+    ```
+
+2. Add deadsnakes PPA to sources list
+
+    ```bash
+    add-apt-repository ppa:deadsnakes/ppa -y
+    ```
+
+3. Install using apt
+    ```bash
+    apt update
+    apt isntall python3.10
+    ```
+
+4. Install pip
+    ```bash
+    curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
+    python3 get-pip.py
+    ```

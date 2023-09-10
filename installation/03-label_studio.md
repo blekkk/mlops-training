@@ -9,7 +9,7 @@
     chmod -R 777 mydata
     ```
     
-2. Clone or download label_studio-compose.yaml from repository/ftp server if you don't have it yet
+2. Clone or download ls-compose.yaml from repository/ftp server if you don't have it yet
     
 3. Execute label studio installation
     

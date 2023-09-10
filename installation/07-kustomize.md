@@ -16,7 +16,12 @@
     ./install_kustomize.sh 5.1.0
     ```
 
-3. Verify installation
+3. Move kustomize bin file
+    ```bash
+    mv kustomize /usr/bin/kustomize
+    ```
+
+4. Verify installation
 
     ```bash
     kustomize version

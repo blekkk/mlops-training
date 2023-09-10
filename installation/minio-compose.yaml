@@ -12,8 +12,8 @@ services:
     environment:
       MINIO_ROOT_USER: minioadmin
       MINIO_ROOT_PASSWORD: minioadmin
-      MINIO_SERVER_URL: http://a.b.c.d:xxxx # FIXME
-    command: server --console-address ":xxxx" /data
+      MINIO_SERVER_URL: http://a.b.c.d:9000 # FIXME
+    command: server --console-address ":9001" /data
 
 volumes:
   minio_storage: {}
