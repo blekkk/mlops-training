@@ -30,7 +30,7 @@ services:
       - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
       - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
       - DEFAULT_ARTIFACT_ROOT=${DEFAULT_ARTIFACT_ROOT}
-      - HOST_IP = ${HOST_IP}
+      - HOST_IP=${HOST_IP}
     command: mlflow server --backend-store-uri mysql+pymysql://${MYSQL_USER}:${MYSQL_PASSWORD}@${HOST_IP}:3306/${MYSQL_DATABASE} --default-artifact-root ${DEFAULT_ARTIFACT_ROOT} --serve-artifacts --host 0.0.0.0:5000
 
 networks:
