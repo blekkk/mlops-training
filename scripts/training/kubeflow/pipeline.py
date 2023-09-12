@@ -222,7 +222,7 @@ def train_model(
     model.add_callback("on_fit_epoch_end", on_fit_epoch_end)
     model.add_callback("on_train_end", on_train_end)
 
-    model.train(data=f"/mnt/{uuid}/yolo/data.yaml", epochs=25, imgsz=512)
+    model.train(data=f"/mnt/{uuid}/yolo/data.yaml", epochs=50, imgsz=512)
 
     os.system(f"rm -rf /mnt/{uuid}/")
 
