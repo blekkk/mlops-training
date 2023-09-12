@@ -57,14 +57,9 @@ def download_and_unzip_data(
     with open(f"/mnt/{uuid}/dataset/result.json", "w") as f:
         json.dump(data, f)
 
-    os.system(f"ls -R /mnt/{uuid}/dataset")
-
 
 def slice_data(uuid: str):
     import os
-
-    # os.system("apt update && apt install ffmpeg libsm6 libxext6  -y")
-
     from sahi.slicing import slice_coco
     import shutil
 
@@ -85,8 +80,6 @@ def slice_data(uuid: str):
         ignore_negative_samples=False,
         verbose=True,
     )
-
-    os.system(f"rm -rf /mnt/{uuid}/dataset")
 
 
 def convert_coco_to_yolo(uuid: str):
@@ -109,8 +102,6 @@ def convert_coco_to_yolo(uuid: str):
         annotations_directory_path=YOLO_ANNOTATION_DIR,
         data_yaml_path=YOLO_YAML_PATH,
     )
-
-    os.system(f"rm -rf /mnt/{uuid}/coco-sliced")
 
 
 def split_dataset(
