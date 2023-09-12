@@ -91,6 +91,7 @@ def pika_callback(ch, method, properties, body):
             "minio_access": MINIO_ACCESS_KEY,
             "minio_secret": MINIO_SECRET_KEY,
             "host_ip": HOST_IP,
+            "namespace": args.namespace,
             "body_dict": body_dict,
         },
         namespace=args.namespace,

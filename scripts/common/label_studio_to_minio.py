@@ -54,7 +54,6 @@ parser.add_argument(
     required=False,
 )
 
-
 parser.add_argument(
     "-t",
     "--token",
@@ -71,10 +70,19 @@ parser.add_argument(
     required=False,
 )
 
+parser.add_argument(
+    "-b",
+    "--bucket",
+    dest="MINIO_BUCKET",
+    help="Target minio bucket",
+    required=False,
+)
+
 args = parser.parse_args()
 
 LABEL_STUDIO_IP = args.LABEL_STUDIO_IP or HOST_IP
 MINIO_IP = args.MINIO_IP or HOST_IP
+MINIO_BUCKET = args.MINIO_BUCKET
 
 LABEL_STUDIO_URL = f"http://{LABEL_STUDIO_IP}:8080"
 LABEL_STUDIO_API = args.LABEL_STUDIO_API
@@ -315,7 +323,7 @@ def main():
     )
 
     result = client.fput_object(
-        "annotateddata",
+        f"annotateddata",
         f"{LABEL_STUDIO_PROJECT_ID}/{DATASET_FORMAT}_dataset.zip",
         f"{LABEL_STUDIO_PROJECT_ID}/{DATASET_FORMAT}_dataset.zip",
         progress=Progress(),

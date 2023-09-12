@@ -42,7 +42,7 @@ def download_and_unzip_data(
     ) as zObject:
         zObject.extractall(path=f"/mnt/{uuid}/dataset")
 
-    with open("/mnt/{uuid}/dataset/result.json") as f:
+    with open(f"/mnt/{uuid}/dataset/result.json") as f:
         data = json.load(f)
         for im in data["images"]:
             file_path = im["file_name"].replace("\\", "").replace("s3://", "")
@@ -54,7 +54,7 @@ def download_and_unzip_data(
             )
             im["file_name"] = f"images\\/{file_name}"
 
-    with open("/mnt/{uuid}/dataset/result.json", "w") as f:
+    with open(f"/mnt/{uuid}/dataset/result.json", "w") as f:
         json.dump(data, f)
 
 
@@ -148,7 +148,11 @@ def split_dataset(uuid: str):
             f.write(line)
 
 
-def train_model(uuid: str, host_ip: str):
+def train_model(
+    uuid: str,
+    host_ip: str,
+    namespace: str,
+):
     from ultralytics import YOLO
     import mlflow
     import os
@@ -158,10 +162,10 @@ def train_model(uuid: str, host_ip: str):
 
     global run_id, experiment_name
 
-    os.environ["MLFLOW_TRACKING_URI"] = f"http://103.63.25.170:5000"
+    os.environ["MLFLOW_TRACKING_URI"] = f"http://{namespace}.mlops.my.id:5000"
     os.environ["AWS_ACCESS_KEY_ID"] = "minioadmin"
     os.environ["AWS_SECRET_ACCESS_KEY"] = "minioadmin"
-    os.environ["MLFLOW_S3_ENDPOINT_URL"] = f"http://103.63.25.170:9000"
+    os.environ["MLFLOW_S3_ENDPOINT_URL"] = f"http://{namespace}.mlops.my.id:9000"
     os.environ["MLFLOW_S3_IGNORE_TLS"] = "true"
     mlflow_location = os.environ["MLFLOW_TRACKING_URI"]
 
@@ -231,7 +235,7 @@ slice_data_op = comp.create_component_from_func(
 convert_coco_to_yolo_op = comp.create_component_from_func(
     convert_coco_to_yolo,
     packages_to_install=["supervision==0.12.0"],
-    base_image="python:3.10",
+    base_image="blekkk/python-supervision:1.0.0",
 )
 split_dataset_op = comp.create_component_from_func(split_dataset)
 train_model_op = comp.create_component_from_func(
@@ -243,7 +247,12 @@ train_model_op = comp.create_component_from_func(
 
 @dsl.pipeline()
 def yolo_pipeline(
-    minio_host: str, minio_access: str, minio_secret: str, host_ip: str, body_dict: dict
+    minio_host: str,
+    minio_access: str,
+    minio_secret: str,
+    host_ip: str,
+    namespace: str,
+    body_dict: dict,
 ):
     run_uuid = uuid.uuid4()
     run_uuid = str(run_uuid)
@@ -269,9 +278,11 @@ def yolo_pipeline(
     split_dataset_task = split_dataset_op(uuid=run_uuid).after(
         convert_coco_to_yolo_task
     )
-    train_model_task = train_model_op(uuid=run_uuid, host_ip=host_ip).after(
-        split_dataset_task
-    )
+    train_model_task = train_model_op(
+        uuid=run_uuid,
+        host_ip=host_ip,
+        namespace=namespace,
+    ).after(split_dataset_task)
 
     download_and_unzip_data_task.apply(mount_pvc_func())
     # slice_data_task.apply(mount_pvc_func())
