@@ -323,7 +323,7 @@ def main():
     )
 
     result = client.fput_object(
-        f"annotateddata",
+        f"{MINIO_BUCKET}",
         f"{LABEL_STUDIO_PROJECT_ID}/{DATASET_FORMAT}_dataset.zip",
         f"{LABEL_STUDIO_PROJECT_ID}/{DATASET_FORMAT}_dataset.zip",
         progress=Progress(),

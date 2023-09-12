@@ -2,7 +2,7 @@ import kfp
 from minio import Minio
 from minio.error import S3Error
 from ast import literal_eval
-from kubeflow.pipelinev import yolo_pipeline
+from kubeflow.pipeline import yolo_pipeline
 from kubeflow.auth import get_istio_auth_session
 import socket
 import pika
