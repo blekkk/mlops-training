@@ -45,17 +45,19 @@ def download_and_unzip_data(
     with open(f"/mnt/{uuid}/dataset/result.json") as f:
         data = json.load(f)
         for im in data["images"]:
-            file_path = im["file_name"].replace("\\", "").replace("s3://", "")
+            file_path = im["file_name"].replace("\\", "").replace("s3://dataset", "")
             file_name = file_path.split("/").pop()
             client.fget_object(
                 "dataset",
                 file_path,
-                f"/mnt/{uuid}/dataset/images/{file_name}",
+                f"/mnt/{uuid}/dataset/{file_name}",
             )
-            im["file_name"] = f"images\\/{file_name}"
+            im["file_name"] = f"{file_name}"
 
     with open(f"/mnt/{uuid}/dataset/result.json", "w") as f:
         json.dump(data, f)
+
+    os.system(f"ls -R /mnt/{uuid}/dataset")
 
 
 def slice_data(uuid: str):
@@ -92,7 +94,7 @@ def convert_coco_to_yolo(uuid: str):
     import shutil
     import supervision as sv
 
-    COCO_IMAGE_DIR = f"/mnt/{uuid}/dataset/images"
+    COCO_IMAGE_DIR = f"/mnt/{uuid}/dataset"
     COCO_ANNOTATION_PATH = f"/mnt/{uuid}/dataset/result.json"
     YOLO_IMAGE_DIR = f"/mnt/{uuid}/yolo/data"
     YOLO_ANNOTATION_DIR = f"/mnt/{uuid}/yolo/data"
@@ -101,6 +103,7 @@ def convert_coco_to_yolo(uuid: str):
     ds = sv.DetectionDataset.from_coco(
         images_directory_path=COCO_IMAGE_DIR,
         annotations_path=COCO_ANNOTATION_PATH,
+        force_masks=True,
     ).as_yolo(
         images_directory_path=YOLO_IMAGE_DIR,
         annotations_directory_path=YOLO_ANNOTATION_DIR,
@@ -110,15 +113,21 @@ def convert_coco_to_yolo(uuid: str):
     os.system(f"rm -rf /mnt/{uuid}/coco-sliced")
 
 
-def split_dataset(uuid: str):
+def split_dataset(
+    uuid: str,
+    namespace: str,
+):
     import os
     import random
     import shutil as sh
     from pathlib import Path
 
     def split_dataset_file_from_images(path, output_dir, val_ratio=0.1):
+        ext = ".png"
+        if namespace == "alpha" or namespace == "echo":
+            ext = ".jpg"
         DATA_DIR = Path(path)
-        img_list = list((DATA_DIR.glob("*.png")))
+        img_list = list((DATA_DIR.glob(f"*{ext}")))
         random.shuffle(img_list)
         os.makedirs(f"{output_dir}/val", exist_ok=True)
         os.makedirs(f"{output_dir}/train", exist_ok=True)
@@ -126,14 +135,17 @@ def split_dataset(uuid: str):
         for i in range(0, int(len(img_list) * val_ratio)):
             val_img = img_list.pop()
             sh.move(
-                f"{DATA_DIR}/{val_img.stem}.png", f"{output_dir}/val/{val_img.stem}.png"
+                f"{DATA_DIR}/{val_img.stem}{ext}",
+                f"{output_dir}/val/{val_img.stem}{ext}",
             )
             sh.move(
                 f"{DATA_DIR}/{val_img.stem}.txt", f"{output_dir}/val/{val_img.stem}.txt"
             )
 
         for img in img_list:
-            sh.move(f"{DATA_DIR}/{img.stem}.png", f"{output_dir}/train/{img.stem}.png")
+            sh.move(
+                f"{DATA_DIR}/{img.stem}{ext}", f"{output_dir}/train/{img.stem}{ext}"
+            )
             sh.move(f"{DATA_DIR}/{img.stem}.txt", f"{output_dir}/train/{img.stem}.txt")
 
     YOLO_DATA_DIR = f"/mnt/{uuid}/yolo/data"
@@ -219,7 +231,7 @@ def train_model(
     model.add_callback("on_fit_epoch_end", on_fit_epoch_end)
     model.add_callback("on_train_end", on_train_end)
 
-    model.train(data=f"/mnt/{uuid}/yolo/data.yaml", epochs=15, imgsz=512)
+    model.train(data=f"/mnt/{uuid}/yolo/data.yaml", epochs=25, imgsz=512)
 
     os.system(f"rm -rf /mnt/{uuid}/")
 
@@ -234,7 +246,6 @@ slice_data_op = comp.create_component_from_func(
 )
 convert_coco_to_yolo_op = comp.create_component_from_func(
     convert_coco_to_yolo,
-    packages_to_install=["supervision==0.12.0"],
     base_image="blekkk/python-supervision:1.0.0",
 )
 split_dataset_op = comp.create_component_from_func(split_dataset)
@@ -275,9 +286,10 @@ def yolo_pipeline(
     convert_coco_to_yolo_task = convert_coco_to_yolo_op(uuid=run_uuid).after(
         download_and_unzip_data_task
     )
-    split_dataset_task = split_dataset_op(uuid=run_uuid).after(
-        convert_coco_to_yolo_task
-    )
+    split_dataset_task = split_dataset_op(
+        uuid=run_uuid,
+        namespace=namespace,
+    ).after(convert_coco_to_yolo_task)
     train_model_task = train_model_op(
         uuid=run_uuid,
         host_ip=host_ip,
